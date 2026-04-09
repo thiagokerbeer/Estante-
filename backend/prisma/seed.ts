@@ -8,9 +8,9 @@ const DEMO_PASSWORD = "DemoEstante!24";
 const DEMO_FREE_EMAIL = "demo.free@estante.plus";
 const DEMO_PLUS_EMAIL = "demo.plus@estante.plus";
 
-/** Fotos de livros/biblioteca no Unsplash (licença Unsplash — uso editorial/portfólio). Não são capas oficiais das obras. */
-const cover = (photoId: string) =>
-  `https://images.unsplash.com/photo-${photoId}?w=500&auto=format&fit=crop&q=80`;
+/** Capa real via Open Library Covers API (gratuita, sem chave). */
+const olCover = (isbn: string) =>
+  `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
 
 type SeedBook = {
   title: string;
@@ -27,7 +27,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Um piloto cai no deserto e encontra um menino de outro planeta. Uma fábula sobre amizade, perda e o essencial invisível aos olhos.",
     isPremium: false,
-    coverUrl: cover("1544947950-fa07a98d2378"),
+    coverUrl: olCover("9780156012195"),
   },
   {
     title: "1984",
@@ -35,7 +35,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Winston Smith vive sob um regime totalitário onde o Grande Irmão vigia tudo. Uma distopia que continua atual.",
     isPremium: true,
-    coverUrl: cover("1512820790803-83ca734da794"),
+    coverUrl: olCover("9780451524935"),
   },
   {
     title: "Dom Casmurro",
@@ -43,7 +43,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Bentinho narra sua juventude e a dúvida que o consome: Capitu traiu ou não? Um clássico da literatura brasileira.",
     isPremium: false,
-    coverUrl: cover("1507003211169-0a1dd7228f2d"),
+    coverUrl: olCover("9780195102680"),
   },
   {
     title: "Sapiens",
@@ -51,7 +51,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Uma breve história da humanidade: da evolução cognitiva às revoluções agrícola e científica.",
     isPremium: true,
-    coverUrl: cover("1589829085413-e567aef48d7b"),
+    coverUrl: olCover("9780062316097"),
   },
   {
     title: "A Metamorfose",
@@ -59,14 +59,14 @@ const booksData: SeedBook[] = [
     synopsis:
       "Gregor Samsa acorda transformado em um inseto. Uma narrativa absurda sobre alienação e família.",
     isPremium: false,
-    coverUrl: cover("1519682337058-a94d519337bc"),
+    coverUrl: olCover("9780486290300"),
   },
   {
     title: "Cem Anos de Solidão",
     author: "Gabriel García Márquez",
     synopsis: "A saga da família Buendía em Macondo. Realismo mágico em estado puro.",
     isPremium: true,
-    coverUrl: cover("1495446815901-a72907e66b33"),
+    coverUrl: olCover("9780060883287"),
   },
   {
     title: "O Alquimista",
@@ -74,7 +74,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Santiago, pastor andaluz, segue sinais em busca de um tesouro. Uma jornada sobre ouvir o coração e os próprios sonhos.",
     isPremium: false,
-    coverUrl: cover("1497633762265-9d179a990aa6"),
+    coverUrl: olCover("9780062315007"),
   },
   {
     title: "Capitães da Areia",
@@ -82,7 +82,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Meninos de rua em Salvador nos anos 1930: bando, lealdade e infância à margem. Um retrato vibrante da Bahia.",
     isPremium: false,
-    coverUrl: cover("1524578271613-d550eacf6090"),
+    coverUrl: olCover("9788535919783"),
   },
   {
     title: "Orgulho e Preconceito",
@@ -90,7 +90,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Elizabeth Bennet e Mr. Darcy atravessam equívocos de classe e caráter. Romance de costumes afiado e atemporal.",
     isPremium: false,
-    coverUrl: cover("1526243741027-444d633d7365"),
+    coverUrl: olCover("9780141439518"),
   },
   {
     title: "O Alienista",
@@ -98,7 +98,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "O médico Bacamarte e o experimento com o hospício de Itaguaí. Humor mordaz sobre ciência, loucura e poder.",
     isPremium: false,
-    coverUrl: cover("1544716278-ca5e3f661abd"),
+    coverUrl: olCover("9780195102680"),
   },
   {
     title: "A Hora da Estrela",
@@ -106,7 +106,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Macabéa, datilógrafa no Rio, entre melancolia e resistência. Prosa lírica sobre existência frágil e linguagem.",
     isPremium: false,
-    coverUrl: cover("1516979187457-637abb4f9353"),
+    coverUrl: olCover("9780811214483"),
   },
   {
     title: "O Morro dos Ventos Uivantes",
@@ -114,7 +114,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Paixão destrutiva em charnecas inglesas: Cathy, Heathcliff e uma casa marcada por ódio e desejo.",
     isPremium: false,
-    coverUrl: cover("1507842217343-583bb7270b66"),
+    coverUrl: olCover("9780141439556"),
   },
   {
     title: "Memórias Póstumas de Brás Cubas",
@@ -122,7 +122,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Um defunto autor conta sua vida com ironia. Marco do realismo brasileiro e da narrativa não linear.",
     isPremium: false,
-    coverUrl: cover("1532012197267-da84d127e765"),
+    coverUrl: olCover("9780195097146"),
   },
   {
     title: "O Cortiço",
@@ -130,7 +130,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Naturalismo no Rio do século XIX: cortiço, miséria e instintos. Retrato social de uma cidade em transformação.",
     isPremium: false,
-    coverUrl: cover("1521587760476-6c12a4b04090"),
+    coverUrl: olCover("9780195102673"),
   },
   {
     title: "Grande Sertão: Veredas",
@@ -138,7 +138,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Riobaldo e o banditismo no sertão, em prosa densa e inventiva. Obra-prima da língua e do território brasileiro.",
     isPremium: true,
-    coverUrl: cover("1482192596544-9eb754e6659d"),
+    coverUrl: olCover("9780394441481"),
   },
   {
     title: "A Revolução dos Bichos",
@@ -146,7 +146,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Fazenda onde animais expulsam humanos e o poder corrói ideais. Fábula política em chave satírica.",
     isPremium: true,
-    coverUrl: cover("1516976432424-e27bca5f97b3"),
+    coverUrl: olCover("9780452284241"),
   },
   {
     title: "O Senhor dos Anéis",
@@ -154,7 +154,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Frodo e a Comunidade enfrentam Sauron pela Terra-média. Épico fundacional da fantasia moderna.",
     isPremium: true,
-    coverUrl: cover("1592496431122-2349e0fbc311"),
+    coverUrl: olCover("9780618640157"),
   },
   {
     title: "Duna",
@@ -162,7 +162,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Paul Atreides em Arrakis: especiaria, ecologia política e destino. Sci-fi de mundo aberto e denso.",
     isPremium: true,
-    coverUrl: cover("1451187580459-43490279c0fa"),
+    coverUrl: olCover("9780441013593"),
   },
   {
     title: "O Poder do Hábito",
@@ -170,7 +170,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Como rotinas se formam no cérebro e na empresa — e como mudá-las. Não ficção acessível sobre comportamento.",
     isPremium: true,
-    coverUrl: cover("1555252333-9f8e92e65df9"),
+    coverUrl: olCover("9780812981605"),
   },
   {
     title: "Mindset",
@@ -178,7 +178,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Mentalidade fixa versus de crescimento: impacto em aprendizado, trabalho e relações. Base em pesquisa psicológica.",
     isPremium: true,
-    coverUrl: cover("1524995997946-a1c2e315a42f"),
+    coverUrl: olCover("9780345472328"),
   },
   {
     title: "O Nome da Rosa",
@@ -186,7 +186,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Frei Guilherme investiga mortes em um mosteiro medieval. Romance histórico, teológico e de enigma.",
     isPremium: true,
-    coverUrl: cover("1509021436665-8f07dbf5bf1e"),
+    coverUrl: olCover("9780156001311"),
   },
   {
     title: "A Arte da Guerra",
@@ -194,7 +194,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Estratégia, engano e liderança em trechos concisos. Clássico chinês relido em negócios e vida.",
     isPremium: true,
-    coverUrl: cover("1526498460520-4c246339dccb"),
+    coverUrl: olCover("9780140439199"),
   },
   {
     title: "O Homem Mais Rico da Babilônia",
@@ -202,7 +202,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Parábolas sobre poupar, investir e evitar dívidas. Educação financeira em linguagem de contos orientais.",
     isPremium: true,
-    coverUrl: cover("1554224155-6726b3ff858f"),
+    coverUrl: olCover("9780451205360"),
   },
   {
     title: "O Caçador de Pipas",
@@ -210,7 +210,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Amir e Hassan no Cabul pré-guerra: culpa, redenção e exílio. Drama familiar contra o pano de fundo do Afeganistão.",
     isPremium: true,
-    coverUrl: cover("1519681393784-d120267933ba"),
+    coverUrl: olCover("9781594631931"),
   },
   {
     title: "A Culpa é das Estrelas",
@@ -218,7 +218,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Hazel e Gus, adolescentes com câncer, entre ironia e ternura. Romance contemporâneo sobre tempo e vínculo.",
     isPremium: false,
-    coverUrl: cover("1513001900724-44d1ea45115f"),
+    coverUrl: olCover("9780525478812"),
   },
   {
     title: "O Hobbit",
@@ -226,7 +226,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Bilbo Bolseiro, Gandalf e os anões rumo à Montanha Solitária. Aventura que antecede o grande épico.",
     isPremium: true,
-    coverUrl: cover("1518709268805-4e9042af9f23"),
+    coverUrl: olCover("9780547928227"),
   },
   {
     title: "Fundação",
@@ -234,7 +234,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Psicohistória e império galáctico em declínio. Ciclo que moldou a ficção científica clássica.",
     isPremium: true,
-    coverUrl: cover("1446776653964-20c1d3a81b06"),
+    coverUrl: olCover("9780553293357"),
   },
   {
     title: "O Conto da Aia",
@@ -242,7 +242,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Gilead: regime teocrático e corpos femininos como recurso de Estado. Distopia feminista e perturbadora.",
     isPremium: true,
-    coverUrl: cover("1456513080510-7bf3a84b82f8"),
+    coverUrl: olCover("9780385490818"),
   },
   {
     title: "O Velho e o Mar",
@@ -250,7 +250,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Santiago, o pescador cubano, e o marlins. Prosa enxuta sobre resistência, dignidade e derrota honrosa.",
     isPremium: false,
-    coverUrl: cover("1439405326854-014607f0d800"),
+    coverUrl: olCover("9780684801223"),
   },
   {
     title: "A Insustentável Leveza do Ser",
@@ -258,7 +258,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Tomas, Tereza e Sabina entre Praga e o exílio. Romance filosófico sobre peso, liberdade e coincidência.",
     isPremium: true,
-    coverUrl: cover("1481627834876-b7833e8f5570"),
+    coverUrl: olCover("9780060932138"),
   },
   {
     title: "Iracema",
@@ -266,7 +266,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "Lenda de amor entre índia e português no Ceará colonial. Romance indianista e símbolo nacional.",
     isPremium: false,
-    coverUrl: cover("1463320726281-d696936d3b38"),
+    coverUrl: olCover("9780195072211"),
   },
   {
     title: "O Diário de Anne Frank",
@@ -274,7 +274,7 @@ const booksData: SeedBook[] = [
     synopsis:
       "A adolescente escondida em Amsterdã durante o nazismo. Testemunho íntimo e humano da Segunda Guerra.",
     isPremium: false,
-    coverUrl: cover("1524997990755-06641f58dc7c"),
+    coverUrl: olCover("9780553296983"),
   },
 ];
 
