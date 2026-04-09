@@ -1,20 +1,26 @@
 # Estante+
 
-Aplicação web de **catálogo de livros** com **planos Free e Plus** (demonstração), autenticação por **JWT**, API REST em **Node** e interface em **React**. Projeto pensado para **portfólio**: mostra separação front/back, PostgreSQL em produção, segurança básica (CORS, rate limit, Helmet) e fluxo de “assinatura” simulado com livros premium bloqueados para quem não está no Plus.
+Aplicação web de **catálogo de livros** com **planos Free e Plus** (demonstração), autenticação por **JWT**, API REST em **Node** e interface em **React**. Projeto pensado para **portfólio**: mostra separação front/back, PostgreSQL em produção, segurança básica (CORS, rate limit, Helmet) e fluxo de "assinatura" simulado com livros premium bloqueados para quem não está no Plus.
 
-**Repositório:** [github.com/thiagokerbeer/Estante-](https://github.com/thiagokerbeer/Estante-)
+| | |
+|---|---|
+| **Demo ao vivo** | [estante-wine.vercel.app](https://estante-wine.vercel.app) |
+| **API** | [estante-plus-api.onrender.com](https://estante-plus-api.onrender.com) |
+| **Repositório** | [github.com/thiagokerbeer/Estante-](https://github.com/thiagokerbeer/Estante-) |
+
+> **Contas de teste:** `demo.free@estante.plus` / `demo.plus@estante.plus` — senha `DemoEstante!24`
 
 ---
 
 ## O que o projeto demonstra
 
-- **Monorepo** com `frontend` (SPA) e `backend` (API), sem framework full-stack único — deploy independente (ex.: Vercel + Render).
+- **Monorepo** com `frontend` (SPA) e `backend` (API), sem framework full-stack único — deploy independente (Vercel + Render).
 - **Autenticação real** (cadastro/login, hash de senha, sessão via Bearer token).
-- **Autorização por plano**: catálogo e fichas de livro adaptam o que o usuário pode ver (livros premium “trancados” sem Plus ativo).
-- **Persistência** com **Prisma** e **PostgreSQL** (migrations versionadas; alinhado com ambiente de produção).
+- **Autorização por plano**: catálogo e fichas de livro adaptam o que o usuário pode ver (livros premium "trancados" sem Plus ativo).
+- **Persistência** com **Prisma** e **PostgreSQL** (migrations versionadas; banco gerenciado no Neon em produção).
 - **Experiência de produto**: home, catálogo, página do livro, preços/assinatura (rota privada), privacidade (LGPD em modo demonstração), banner de cookies.
-- **Operação**: health check (`/health`), variáveis de ambiente documentadas, `docker-compose` só para Postgres local, blueprint `render.yaml` para API + banco.
-- **Portfólio-ready**: seção "Stack técnica" visível na home, link GitHub no footer, meta tags Open Graph no `index.html`, capas reais dos livros via Unsplash (retornadas pela API e renderizadas com fallback no catálogo e na ficha do livro).
+- **Operação**: health check (`/health`), graceful shutdown (SIGTERM/SIGINT), logging de requisições por ambiente, `render.yaml` Blueprint para deploy com um clique.
+- **Portfólio-ready**: seção "Stack técnica" visível na home, link GitHub no footer, meta tags Open Graph no `index.html`, capas reais dos livros via Unsplash.
 
 ---
 
@@ -24,29 +30,29 @@ Aplicação web de **catálogo de livros** com **planos Free e Plus** (demonstra
 |--------|----------------|
 | **Frontend** | React 19, TypeScript, Vite 6, Tailwind CSS 4, React Router 7 |
 | **Backend** | Node.js 20+, Express 4, TypeScript, Prisma 6 |
-| **Dados** | PostgreSQL 16 |
+| **Banco** | PostgreSQL 16 (Neon em produção, Docker local) |
 | **Auth** | bcryptjs, jsonwebtoken |
-| **Segurança / HTTP** | helmet, cors configurável, express-rate-limit |
-| **Qualidade de código** | graceful shutdown (SIGTERM/SIGINT), logging por env, seed com `createMany` |
+| **Segurança / HTTP** | Helmet, CORS configurável, express-rate-limit |
+| **Deploy** | Vercel (front) · Render (API) · Neon (banco) |
 
 ---
 
-## Arquitetura (visão geral)
+## Arquitetura
 
 ```text
-┌─────────────┐     HTTPS      ┌──────────────────┐
-│   Vercel    │  ───────────►  │  Render (Node)   │
-│  (frontend) │   VITE_API_URL │  estante-plus-api │
-└─────────────┘                └────────┬─────────┘
-                                        │
-                                        │ DATABASE_URL
-                                        ▼
-                                ┌───────────────┐
-                                │  PostgreSQL   │
-                                └───────────────┘
+┌──────────────────────┐     HTTPS      ┌───────────────────────┐
+│  Vercel              │  ───────────►  │  Render (Node.js)     │
+│  estante-wine.vercel │   VITE_API_URL │  estante-plus-api     │
+└──────────────────────┘                └──────────┬────────────┘
+                                                   │
+                                                   │ DATABASE_URL
+                                                   ▼
+                                        ┌──────────────────────┐
+                                        │  Neon (PostgreSQL)   │
+                                        └──────────────────────┘
 ```
 
-Em **desenvolvimento**, o Vite faz **proxy** de `/api` → `http://localhost:3001`, então o front chama caminhos como `/api/books` sem CORS extra na máquina local.
+Em **desenvolvimento**, o Vite faz proxy de `/api` → `http://localhost:3001` automaticamente.
 
 ---
 
@@ -54,71 +60,63 @@ Em **desenvolvimento**, o Vite faz **proxy** de `/api` → `http://localhost:300
 
 ```text
 .
-├── frontend/          # SPA React (build estático)
-├── backend/           # API Express + Prisma
-├── docker-compose.yml # Postgres local
-├── render.yaml        # Blueprint Render (API + Postgres)
-├── DEPLOY.md          # Passo a passo detalhado de deploy
-└── README.md          # Este arquivo
+├── frontend/          # SPA React (build estático → Vercel)
+├── backend/           # API Express + Prisma (→ Render)
+├── docker-compose.yml # Postgres local para desenvolvimento
+├── render.yaml        # Blueprint Render (deploy com um clique)
+├── DEPLOY.md          # Passo a passo completo de deploy
+└── README.md
 ```
 
 Principais entradas:
 
 - **API:** `backend/src/index.ts` — rotas `/auth`, `/books`, `/subscription`, `/legal`, `/health`.
-- **Validação / limites de entrada:** `backend/src/lib/validation.ts` — e-mail, senha e `id` de livro antes de ir ao banco.
+- **Validação:** `backend/src/lib/validation.ts` — e-mail, senha e `id` de livro validados antes de ir ao banco.
 - **Modelos:** `backend/prisma/schema.prisma` — `User` (plano `FREE` | `PLUS`), `Book` (`isPremium`).
-- **Seed:** `backend/prisma/seed.ts` — dados iniciais para demo.
-- **Front:** `frontend/src/App.tsx` — rotas; `frontend/src/api/client.ts` — cliente HTTP (`VITE_API_URL` ou `/api` em dev).
+- **Seed:** `backend/prisma/seed.ts` — catálogo e contas demo.
+- **Front:** `frontend/src/App.tsx` — rotas; `frontend/src/api/client.ts` — cliente HTTP.
 
 ---
 
 ## Pré-requisitos
 
 - **Node.js 20+** ([nodejs.org](https://nodejs.org/))
-- **Docker** (opcional mas recomendado) para subir PostgreSQL local com um comando
-- Conta **Git** e, para deploy, contas em **Render** e **Vercel** (ou equivalentes)
+- **Docker** (para Postgres local)
+- Para deploy: contas no [Neon](https://neon.tech), [Render](https://render.com) e [Vercel](https://vercel.com)
 
 ---
 
 ## Como rodar localmente
 
-### 1. Banco PostgreSQL
-
-Na **raiz** do repositório:
+### 1. Postgres com Docker
 
 ```bash
+# Na raiz do projeto
 docker compose up -d
 ```
-
-Isso sobe Postgres 16 com usuário/db `estante` (ver `docker-compose.yml`).
 
 ### 2. Backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Ajuste .env se necessário — o exemplo já aponta para localhost:5432/estante
 npm ci
 npx prisma migrate deploy
 npm run db:seed
 npm run dev
 ```
 
-A API escuta na porta **3001** por padrão (`PORT` no `.env`).
-
 ### 3. Frontend
-
-Em outro terminal:
 
 ```bash
 cd frontend
 cp .env.example .env.local
-# Em dev, pode deixar VITE_API_URL vazio — o cliente usa /api (proxy do Vite)
+# VITE_API_URL pode ficar vazio em dev — o Vite usa proxy para /api
 npm ci
 npm run dev
 ```
 
-Abra o endereço que o Vite mostrar (geralmente `http://localhost:5173`).
+Acesse `http://localhost:5173`.
 
 ### Scripts úteis
 
@@ -130,7 +128,6 @@ Abra o endereço que o Vite mostrar (geralmente `http://localhost:5173`).
 | `backend` | `npm run db:seed` | Repopula dados de demonstração |
 | `frontend` | `npm run dev` | Servidor Vite |
 | `frontend` | `npm run build` | Typecheck + bundle para produção |
-| `frontend` | `npm run covers` | Gera assets de capa (script auxiliar) |
 
 ---
 
@@ -140,75 +137,55 @@ Abra o endereço que o Vite mostrar (geralmente `http://localhost:5173`).
 
 | Variável | Descrição |
 |----------|-----------|
-| `DATABASE_URL` | Connection string PostgreSQL (Prisma) |
-| `JWT_SECRET` | Segredo para assinar JWT; em produção use valor longo e aleatório (mín. 32 caracteres) |
-| `FRONTEND_URL` | Origem(s) permitida(s) no CORS (URL exata da Vercel; várias separadas por vírgula) |
+| `DATABASE_URL` | Connection string PostgreSQL (Neon em produção, Docker local) |
+| `JWT_SECRET` | Segredo para assinar JWT — mín. 32 chars em produção |
+| `FRONTEND_URL` | URL exata da Vercel (CORS) — várias separadas por vírgula |
 | `PORT` | Porta da API (padrão `3001`) |
 | `CORS_ALLOW_VERCEL_PREVIEWS` | Opcional: `1` para liberar previews `*.vercel.app` |
-| `TRUST_PROXY_HOPS` | Opcional: atrás de proxy (ex. Render) |
 
-Arquivo de referência: `backend/.env.example`.
-
-### Frontend (build / Vercel)
+### Frontend (Vercel)
 
 | Variável | Descrição |
 |----------|-----------|
-| `VITE_API_URL` | URL pública da API **sem** barra no final (obrigatória no build de produção) |
-
-Em desenvolvimento, se `VITE_API_URL` estiver vazio, o cliente usa **`/api`** (proxy). Ver `frontend/.env.example`.
-
-**Nunca commite** arquivos `.env` com segredos reais — eles já estão no `.gitignore`.
+| `VITE_API_URL` | URL da API no Render, sem barra no final |
 
 ---
 
-## API (resumo)
+## API — endpoints
 
-Todas as respostas relevantes são JSON. Prefixo em produção é a origem da API (sem `/api` no servidor; o `/api` é só convenção no dev via Vite).
+| Grupo | Rota | Notas |
+|-------|------|-------|
+| Saúde | `GET /health` | Retorna uptime, versão e env |
+| Auth | `POST /auth/register` `POST /auth/login` `GET /auth/me` | JWT Bearer |
+| Livros | `GET /books` `GET /books/:id` | Auth opcional; premium trancado sem Plus |
+| Assinatura | `POST /subscription/subscribe` `POST /subscription/cancel` | Demo sem gateway |
+| Legal | `GET /legal/privacy-notice` | LGPD estruturado em JSON |
 
-| Área | Exemplos | Notas |
-|------|----------|--------|
-| Saúde | `GET /health` | Monitoramento / Render health check |
-| Auth | registro, login (ver rotas em `backend/src/routes/auth.ts`) | JWT no header `Authorization: Bearer …` |
-| Livros | `GET /books`, `GET /books/:id` | Auth opcional; premium pode vir “trancado” conforme plano |
-| Assinatura | rotas em `/subscription` | Fluxo de demonstração |
-| Legal | `/legal` | Textos / LGPD demo |
-
-Limites de taxa (rate limit) estão aplicados por grupo de rotas no `index.ts` da API.
+Rate limiting aplicado por grupo de rotas.
 
 ---
 
-## Deploy em produção
+## Deploy
 
-O passo a passo completo (Render + Vercel, Postgres gerenciado, CORS, variáveis) está em **[DEPLOY.md](./DEPLOY.md)**. O arquivo **[render.yaml](./render.yaml)** descreve um blueprint com **PostgreSQL gratuito** e o serviço web apontando para a pasta `backend`.
+Passo a passo completo em **[DEPLOY.md](./DEPLOY.md)**. Resumo:
 
-Resumo:
-
-1. Subir a **API** no Render (build com migrate + seed, start `npm run start`).
-2. Definir **`FRONTEND_URL`** com a URL exata do front na Vercel.
-3. Publicar o **frontend** na Vercel com **root directory** `frontend` e `VITE_API_URL` = URL da API.
+1. Criar banco no **Neon** e copiar a connection string.
+2. No **Render**: New → Blueprint → conectar repo → definir `DATABASE_URL` e `FRONTEND_URL` no painel.
+3. Na **Vercel**: importar repo → Root Directory `frontend` → definir `VITE_API_URL`.
 
 ---
 
-## Segurança e escopo de demonstração
+## Segurança
 
-- Senhas com **hash bcrypt**; política **mínimo 8 / máximo 72 caracteres** (limite do bcrypt) e teto de entrada para evitar abuso de CPU no login.
-- **Login**: comparação bcrypt também quando o e-mail não existe (hash dummy fixo), reduzindo **vazamento por tempo** entre “usuário inexistente” e “senha errada”.
-- **JWT**: apenas **HS256**; limite de tamanho no header `Authorization`; `userId` no payload validado (comprimento) antes de usar.
-- **`GET /books/:id`**: validação do parâmetro `id` (formato esperado de IDs do Prisma) antes de consultar o banco.
-- **Helmet** com `frameguard` e `referrerPolicy`, **CORS** restrito por origem, **rate limiting** em auth, leituras e assinatura; aviso em log na subida se **produção** estiver sem `FRONTEND_URL` e sem previews da Vercel (evita deploy quebrado “mudo” no browser).
-- **Frontend**: cliente HTTP trata respostas **não JSON** (erro de proxy/HTML) sem estourar `JSON.parse` na cara do usuário.
-- Token em **localStorage** (padrão SPA); mitigue **XSS** mantendo dependências atualizadas e evitando `dangerouslySetInnerHTML` / injeção de HTML — o projeto não usa esses padrões no código atual.
-- O fluxo de **pagamento / assinatura real** não está integrado a gateway — é adequado para **portfólio** e aprendizado.
-- Campos como aceite de privacidade no cadastro ilustram preocupação com **LGPD** em nível de UX/modelo; não substitui assessoria jurídica.
-
----
-
-## Licença e uso
-
-Código disponível para **estudo e portfólio**. Se reutilizar trechos, mantenha créditos e adapte segredos/URLs aos seus próprios ambientes.
+- Senhas com **bcrypt** (mín. 8 / máx. 72 chars); hash dummy no login para evitar timing attack por e-mail inexistente.
+- **JWT HS256** com limite de tamanho no header `Authorization`.
+- **Helmet** (`frameguard`, `referrerPolicy`), **CORS** restrito por origem, **rate limiting** separado por grupo de rotas.
+- Validação de formato em todos os inputs antes de consultar o banco.
+- Graceful shutdown no SIGTERM — conexões finalizadas antes de encerrar o processo.
+- Fluxo de assinatura **simulado** (sem gateway real) — adequado para portfólio.
 
 ---
 
 ## Autor
 
-**Thiago Kerbeer** — projeto **Estante+** para demonstração de habilidades em desenvolvimento web full-stack moderno.
+**Thiago Kerbeer** — [github.com/thiagokerbeer](https://github.com/thiagokerbeer)

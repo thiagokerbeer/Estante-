@@ -1,6 +1,8 @@
-# Deploy: Neon (banco) + Render (API) + Vercel (front)
+﻿# Deploy: Neon (banco) + Render (API) + Vercel (front)
 
 Stack de produção: banco PostgreSQL gerenciado no **Neon**, API Node no **Render** (free), SPA React na **Vercel** (free).
+
+URLs em produção: **API** → https://estante-plus-api.onrender.com · **Front** → https://estante-wine.vercel.app
 
 ---
 
