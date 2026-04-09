@@ -1,0 +1,17 @@
+---
+description: Commits frequentes com mensagens realistas após mudanças no código
+alwaysApply: true
+---
+
+# Git e commits (Estante+)
+
+- Depois de **implementar ou corrigir** algo de forma coerente, faça **commit** (não deixe só alterações locais sem versionar).
+- Prefira **commits pequenos e focados** quando as mudanças forem distintas (ex.: um commit para README, outro para bugfix).
+- Use **mensagens em português**, no imperativo, curtas e **realistas**, no estilo Conventional Commits quando fizer sentido:
+  - `feat:` nova funcionalidade
+  - `fix:` correção de bug
+  - `docs:` documentação (README, comentários de deploy)
+  - `chore:` tarefas de manutenção (deps, config, Cursor)
+  - `refactor:` reorganização sem mudar comportamento
+  - `style:` apenas formatação/UI sem alterar lógica
+- Quando houver `origin` e a branch estiver sincronizada com o fluxo do usuário, faça **`git push`** após commits relevantes (ou ao fechar uma tarefa), salvo se o usuário pedir o contrário.
