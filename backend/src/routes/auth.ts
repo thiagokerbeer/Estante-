@@ -127,23 +127,7 @@ authRouter.get(
   requireAuth,
   requireSessionUser,
   asyncHandler(async (req, res) => {
-    const userId = req.userId!;
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        plan: true,
-        planEndsAt: true,
-        createdAt: true,
-        privacyNoticeAcceptedAt: true,
-      },
-    });
-    if (!user) {
-      res.status(401).json({ error: "Sessão inválida. Faça login novamente." });
-      return;
-    }
-    res.json(userPublicFields(user));
+    res.json(userPublicFields(req.sessionUser!));
   })
 );
 
@@ -152,26 +136,10 @@ authRouter.get(
   requireAuth,
   requireSessionUser,
   asyncHandler(async (req, res) => {
-    const userId = req.userId!;
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        plan: true,
-        planEndsAt: true,
-        createdAt: true,
-        privacyNoticeAcceptedAt: true,
-      },
-    });
-    if (!user) {
-      res.status(401).json({ error: "Sessão inválida. Faça login novamente." });
-      return;
-    }
     res.json({
       exportedAt: new Date().toISOString(),
       privacyNoticeUrl: "/legal/privacy-notice",
-      user: userPublicFields(user),
+      user: userPublicFields(req.sessionUser!),
     });
   })
 );

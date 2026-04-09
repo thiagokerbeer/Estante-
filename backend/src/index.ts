@@ -43,6 +43,18 @@ app.use(
 );
 app.use(express.json({ limit: "100kb" }));
 
+/** Log de cada requisição: método, rota, status HTTP e duração em ms. */
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const ms = Date.now() - start;
+    const level = res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
+    const icon = level === "error" ? "✗" : level === "warn" ? "!" : "✓";
+    console.log(`[req] ${icon} ${req.method} ${req.path} → ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60,
