@@ -1,0 +1,15 @@
+# Postgres local — mesmo engine usado em produção (Render). Ver DEPLOY.md e backend/.env.example.
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: estante
+      POSTGRES_PASSWORD: estante
+      POSTGRES_DB: estante
+    volumes:
+      - estante_pgdata:/var/lib/postgresql/data
+
+volumes:
+  estante_pgdata:
