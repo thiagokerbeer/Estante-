@@ -10,6 +10,7 @@ function bookCard(b: {
   id: string;
   title: string;
   author: string;
+  coverUrl: string | null;
   isPremium: boolean;
   locked: boolean;
 }) {
@@ -17,6 +18,7 @@ function bookCard(b: {
     id: b.id,
     title: b.title,
     author: b.author,
+    coverUrl: b.coverUrl,
     isPremium: b.isPremium,
     locked: b.locked,
   };
@@ -39,6 +41,7 @@ booksRouter.get(
           id: b.id,
           title: b.title,
           author: b.author,
+          coverUrl: b.coverUrl,
           isPremium: b.isPremium,
           locked: b.isPremium && !activePlus,
         })
@@ -73,6 +76,7 @@ booksRouter.get(
           id: book.id,
           title: book.title,
           author: book.author,
+          coverUrl: book.coverUrl,
           isPremium: true,
           locked: true,
         }),
@@ -85,6 +89,7 @@ booksRouter.get(
         id: book.id,
         title: book.title,
         author: book.author,
+        coverUrl: book.coverUrl,
         isPremium: book.isPremium,
         locked: false,
       }),

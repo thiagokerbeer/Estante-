@@ -14,6 +14,7 @@ Aplicação web de **catálogo de livros** com **planos Free e Plus** (demonstra
 - **Persistência** com **Prisma** e **PostgreSQL** (migrations versionadas; alinhado com ambiente de produção).
 - **Experiência de produto**: home, catálogo, página do livro, preços/assinatura (rota privada), privacidade (LGPD em modo demonstração), banner de cookies.
 - **Operação**: health check (`/health`), variáveis de ambiente documentadas, `docker-compose` só para Postgres local, blueprint `render.yaml` para API + banco.
+- **Portfólio-ready**: seção "Stack técnica" visível na home, link GitHub no footer, meta tags Open Graph no `index.html`, capas reais dos livros via Unsplash (retornadas pela API e renderizadas com fallback no catálogo e na ficha do livro).
 
 ---
 
