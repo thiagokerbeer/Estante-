@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
 import { optionalAuth, loadUserPlan } from "../middleware/auth.js";
+import { isValidBookId } from "../lib/validation.js";
 
 export const booksRouter = Router();
 
@@ -57,6 +58,10 @@ booksRouter.get(
       activePlus = p.activePlus;
     }
     const id = String(req.params.id);
+    if (!isValidBookId(id)) {
+      res.status(400).json({ error: "Identificador de livro inválido" });
+      return;
+    }
     const book = await prisma.book.findUnique({ where: { id } });
     if (!book) {
       res.status(404).json({ error: "Livro não encontrado" });

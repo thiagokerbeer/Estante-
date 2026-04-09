@@ -4,10 +4,18 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
 import { signToken, requireAuth, requireSessionUser } from "../middleware/auth.js";
+import {
+  normalizeEmail,
+  validateEmailShape,
+  validatePasswordForAuth,
+  validatePasswordInputLength,
+} from "../lib/validation.js";
 
 export const authRouter = Router();
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Hash bcrypt de string impossível de adivinhar — comparação quando o e-mail não existe (reduz vazamento por tempo). */
+const BCRYPT_DUMMY_HASH =
+  "$2a$10$bTzXG.0rd3fk4YtG1ivjvOvIsX2gmX0mLadaNe9C3zN99L5dmQJAu";
 
 function userPublicFields(user: {
   id: string;
@@ -30,15 +38,21 @@ function userPublicFields(user: {
 authRouter.post(
   "/register",
   asyncHandler(async (req, res) => {
-    const email = String(req.body?.email ?? "").trim().toLowerCase();
+    const email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password ?? "");
     const acceptPrivacyNotice = req.body?.acceptPrivacyNotice === true;
-    if (!email || !EMAIL_RE.test(email)) {
+    const pwdLen = validatePasswordInputLength(password);
+    if (!pwdLen.ok) {
+      res.status(400).json({ error: pwdLen.error });
+      return;
+    }
+    if (!validateEmailShape(email)) {
       res.status(400).json({ error: "Informe um e-mail válido" });
       return;
     }
-    if (!password || password.length < 6) {
-      res.status(400).json({ error: "Senha com no mínimo 6 caracteres é obrigatória" });
+    const pwdPolicy = validatePasswordForAuth(password);
+    if (!pwdPolicy.ok) {
+      res.status(400).json({ error: pwdPolicy.error });
       return;
     }
     if (!acceptPrivacyNotice) {
@@ -82,10 +96,21 @@ authRouter.post(
 authRouter.post(
   "/login",
   asyncHandler(async (req, res) => {
-    const email = String(req.body?.email ?? "").trim().toLowerCase();
+    const email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password ?? "");
+    const pwdLen = validatePasswordInputLength(password);
+    if (!pwdLen.ok) {
+      res.status(400).json({ error: pwdLen.error });
+      return;
+    }
+    if (!validateEmailShape(email)) {
+      res.status(401).json({ error: "E-mail ou senha incorretos" });
+      return;
+    }
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    const hash = user?.password ?? BCRYPT_DUMMY_HASH;
+    const passwordOk = await bcrypt.compare(password, hash);
+    if (!user || !passwordOk) {
       res.status(401).json({ error: "E-mail ou senha incorretos" });
       return;
     }

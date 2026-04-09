@@ -63,6 +63,7 @@ Em **desenvolvimento**, o Vite faz **proxy** de `/api` → `http://localhost:300
 Principais entradas:
 
 - **API:** `backend/src/index.ts` — rotas `/auth`, `/books`, `/subscription`, `/legal`, `/health`.
+- **Validação / limites de entrada:** `backend/src/lib/validation.ts` — e-mail, senha e `id` de livro antes de ir ao banco.
 - **Modelos:** `backend/prisma/schema.prisma` — `User` (plano `FREE` | `PLUS`), `Book` (`isPremium`).
 - **Seed:** `backend/prisma/seed.ts` — dados iniciais para demo.
 - **Front:** `frontend/src/App.tsx` — rotas; `frontend/src/api/client.ts` — cliente HTTP (`VITE_API_URL` ou `/api` em dev).
@@ -188,8 +189,13 @@ Resumo:
 
 ## Segurança e escopo de demonstração
 
-- Senhas armazenadas com **hash** (não em texto puro).
-- **Helmet**, **CORS** restrito por origem, **rate limiting** em auth e leituras.
+- Senhas com **hash bcrypt**; política **mínimo 8 / máximo 72 caracteres** (limite do bcrypt) e teto de entrada para evitar abuso de CPU no login.
+- **Login**: comparação bcrypt também quando o e-mail não existe (hash dummy fixo), reduzindo **vazamento por tempo** entre “usuário inexistente” e “senha errada”.
+- **JWT**: apenas **HS256**; limite de tamanho no header `Authorization`; `userId` no payload validado (comprimento) antes de usar.
+- **`GET /books/:id`**: validação do parâmetro `id` (formato esperado de IDs do Prisma) antes de consultar o banco.
+- **Helmet** com `frameguard` e `referrerPolicy`, **CORS** restrito por origem, **rate limiting** em auth, leituras e assinatura; aviso em log na subida se **produção** estiver sem `FRONTEND_URL` e sem previews da Vercel (evita deploy quebrado “mudo” no browser).
+- **Frontend**: cliente HTTP trata respostas **não JSON** (erro de proxy/HTML) sem estourar `JSON.parse` na cara do usuário.
+- Token em **localStorage** (padrão SPA); mitigue **XSS** mantendo dependências atualizadas e evitando `dangerouslySetInnerHTML` / injeção de HTML — o projeto não usa esses padrões no código atual.
 - O fluxo de **pagamento / assinatura real** não está integrado a gateway — é adequado para **portfólio** e aprendizado.
 - Campos como aceite de privacidade no cadastro ilustram preocupação com **LGPD** em nível de UX/modelo; não substitui assessoria jurídica.
 

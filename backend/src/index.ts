@@ -8,9 +8,10 @@ import { booksRouter } from "./routes/books.js";
 import { subscriptionRouter } from "./routes/subscription.js";
 import { legalRouter } from "./routes/legal.js";
 import { isOriginAllowed } from "./lib/cors.js";
-import { assertProductionSecurity, isProd } from "./lib/security.js";
+import { assertProductionSecurity, isProd, warnProductionCors } from "./lib/security.js";
 
 assertProductionSecurity();
+warnProductionCors();
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
@@ -22,6 +23,8 @@ app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: false,
+    frameguard: { action: "deny" },
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   })
 );
 app.use(

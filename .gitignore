@@ -1,0 +1,11 @@
+# Cursor IDE — configurações locais de regras e agente
+.cursor/
+
+# Variáveis de ambiente com segredos
+.env
+.env.local
+.env.*.local
+
+# Artefatos de build
+dist/
+node_modules/

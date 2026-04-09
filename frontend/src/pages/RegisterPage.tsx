@@ -64,7 +64,7 @@ export function RegisterPage() {
         </div>
         <div>
           <label htmlFor="reg-password" className={fieldLabel}>
-            Senha <span className="font-normal text-stone-500">(mín. 6 caracteres)</span>
+            Senha <span className="font-normal text-stone-500">(mín. 8 caracteres)</span>
           </label>
           <input
             id="reg-password"
@@ -74,7 +74,7 @@ export function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             className={`${fieldInput} ${err ? fieldInputError : ""}`}
             required
-            minLength={6}
+            minLength={8}
             aria-invalid={!!err}
             aria-describedby={err ? "reg-error" : undefined}
           />

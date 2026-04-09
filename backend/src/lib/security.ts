@@ -31,3 +31,19 @@ export function assertProductionSecurity(): void {
 export function isProd(): boolean {
   return process.env.NODE_ENV === "production";
 }
+
+/**
+ * Evita deploy “silencioso” onde o front em outro domínio falha no browser por CORS sem mensagem clara nos logs.
+ */
+export function warnProductionCors(): void {
+  if (!isProd()) return;
+  const explicit = (process.env.FRONTEND_URL ?? "").trim();
+  const allowVercel =
+    process.env.CORS_ALLOW_VERCEL_PREVIEWS === "1" ||
+    process.env.CORS_ALLOW_VERCEL_PREVIEWS === "true";
+  if (!explicit && !allowVercel) {
+    console.warn(
+      "[segurança] Produção sem FRONTEND_URL e sem CORS_ALLOW_VERCEL_PREVIEWS: chamadas do navegador a partir de outro domínio serão bloqueadas pelo CORS. Defina FRONTEND_URL (URL exata do front) no painel do host."
+    );
+  }
+}

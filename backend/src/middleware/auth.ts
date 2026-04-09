@@ -3,6 +3,9 @@ import jwt, { type VerifyOptions } from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 import { JWT_SECRET } from "../lib/security.js";
 
+/** Evita corpo gigante / abuse em Authorization (JWT real costuma ter centenas de bytes). */
+const MAX_JWT_CHARS = 2048;
+
 const JWT_VERIFY: VerifyOptions = { algorithms: ["HS256"] };
 
 export type AuthPayload = { userId: string };
@@ -19,16 +22,23 @@ function verifyToken(token: string): AuthPayload | null {
     const decoded = jwt.verify(token, JWT_SECRET, JWT_VERIFY);
     if (typeof decoded !== "object" || decoded === null || !("userId" in decoded)) return null;
     const uid = (decoded as { userId: unknown }).userId;
-    if (typeof uid !== "string" || !uid) return null;
+    if (typeof uid !== "string" || !uid || uid.length > 36) return null;
     return { userId: uid };
   } catch {
     return null;
   }
 }
 
+/** Autenticação opcional: token ausente, vazio ou grande demais → ignora (sem erro). */
+function readBearerOptional(header: string | undefined): string | null {
+  if (!header?.startsWith("Bearer ")) return null;
+  const token = header.slice(7).trim();
+  if (!token || token.length > MAX_JWT_CHARS) return null;
+  return token;
+}
+
 export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
-  const header = req.headers.authorization;
-  const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
+  const token = readBearerOptional(req.headers.authorization);
   if (!token) {
     req.userId = undefined;
     next();
@@ -41,9 +51,17 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
-  const token = header?.startsWith("Bearer ") ? header.slice(7) : null;
+  if (!header?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Token ausente" });
+    return;
+  }
+  const token = header.slice(7).trim();
   if (!token) {
     res.status(401).json({ error: "Token ausente" });
+    return;
+  }
+  if (token.length > MAX_JWT_CHARS) {
+    res.status(401).json({ error: "Token inválido ou expirado" });
     return;
   }
   const p = verifyToken(token);

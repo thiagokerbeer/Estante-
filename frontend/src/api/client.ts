@@ -12,6 +12,18 @@ function resolveApiBase(): string {
 
 const base = resolveApiBase();
 
+function parseJsonSafe<T>(text: string, context: string): T {
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(
+      context === "error"
+        ? "Resposta inválida do servidor. Tente de novo em instantes."
+        : "Resposta inválida do servidor."
+    );
+  }
+}
+
 export async function api<T>(
   path: string,
   options: RequestInit & { token?: string | null } = {}
@@ -26,11 +38,20 @@ export async function api<T>(
     headers,
   });
   const text = await res.text();
+  const ct = res.headers.get("content-type") ?? "";
+  const looksJson = ct.includes("application/json") || /^\s*[\[{]/.test(text);
+
   if (!res.ok) {
-    const data = text ? (JSON.parse(text) as unknown) : null;
-    const err = data as { error?: string } | null;
-    throw new Error(err?.error ?? res.statusText);
+    if (text && looksJson) {
+      const data = parseJsonSafe<unknown>(text, "error");
+      const err = data as { error?: string };
+      throw new Error(err?.error ?? res.statusText);
+    }
+    throw new Error(res.statusText || "Falha na requisição");
   }
   if (!text) return undefined as T;
-  return JSON.parse(text) as T;
+  if (!looksJson) {
+    throw new Error("Resposta inválida do servidor.");
+  }
+  return parseJsonSafe<T>(text, "body");
 }

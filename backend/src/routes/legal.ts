@@ -52,7 +52,7 @@ legalRouter.get("/privacy-notice", (_req, res) => {
       "Revogação de consentimento ao não criar conta ou ao excluir a conta.",
     ],
     security:
-      "Senha com hash (bcrypt), JWT assinado em HS256, checagem de que o usuário ainda existe após o login (evita sessão após exclusão), Helmet, rate limit em auth/leitura/assinatura e HTTPS recomendado em produção.",
+      "Senha com hash (bcrypt), política mínima de 8 caracteres no cadastro, comparação bcrypt no login mesmo quando o e-mail não existe (menos vazamento por tempo), JWT em HS256 com limites de tamanho no header, validação de IDs em rotas de livro, checagem de que o usuário ainda existe após o login (evita sessão após exclusão), Helmet, rate limit em auth/leitura/assinatura e HTTPS recomendado em produção.",
     contact:
       "Para este projeto de portfólio, use o contato indicado no repositório ou perfil do autor (não há encarregado formal em ambiente pessoal de demo).",
     disclaimer:
