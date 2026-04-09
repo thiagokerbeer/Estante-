@@ -75,12 +75,7 @@ export function CatalogPage() {
           description="Verifique se a API está em execução e tente novamente."
         />
         <Alert variant="error" title="Erro de conexão">
-          <p>
-            {error}. Confirme o backend em{" "}
-            <code className="rounded bg-red-100/80 px-1.5 py-0.5 font-mono text-xs">localhost:3001</code> e o
-            comando <code className="rounded bg-red-100/80 px-1.5 py-0.5 font-mono text-xs">npm run dev</code> na
-            pasta <span className="font-medium">backend</span>.
-          </p>
+          <p>{error}. Tente recarregar a página em instantes.</p>
         </Alert>
       </div>
     );
