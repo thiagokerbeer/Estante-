@@ -9,12 +9,14 @@ import { subscriptionRouter } from "./routes/subscription.js";
 import { legalRouter } from "./routes/legal.js";
 import { isOriginAllowed } from "./lib/cors.js";
 import { assertProductionSecurity, isProd, warnProductionCors } from "./lib/security.js";
+import { prisma } from "./lib/prisma.js";
 
 assertProductionSecurity();
 warnProductionCors();
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
+const startedAt = Date.now();
 
 app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS ?? 1) || 1);
 app.disable("x-powered-by");
@@ -66,7 +68,13 @@ const subscriptionLimiter = rateLimit({
 });
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, name: "estante-plus-api" });
+  res.json({
+    ok: true,
+    name: "estante-plus-api",
+    version: process.env.npm_package_version ?? "1.0.0",
+    env: process.env.NODE_ENV ?? "development",
+    uptimeSeconds: Math.floor((Date.now() - startedAt) / 1000),
+  });
 });
 
 app.use("/legal", readLimiter, legalRouter);
@@ -88,6 +96,27 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: message });
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Estante+ API na porta ${port}`);
+const server = app.listen(port, "0.0.0.0", () => {
+  console.log(`[api] Estante+ na porta ${port} (${process.env.NODE_ENV ?? "development"})`);
 });
+
+/**
+ * Graceful shutdown: aguarda conexões em andamento fechar antes de sair.
+ * Essencial no Render e Docker (SIGTERM precede o SIGKILL por ~30s).
+ */
+async function shutdown(signal: string): Promise<void> {
+  console.log(`[api] ${signal} recebido — encerrando...`);
+  server.close(async () => {
+    try {
+      await prisma.$disconnect();
+      console.log("[api] Banco desconectado. Processo encerrado.");
+    } catch (err) {
+      console.error("[api] Erro ao desconectar banco:", err);
+    } finally {
+      process.exit(0);
+    }
+  });
+}
+
+process.on("SIGTERM", () => void shutdown("SIGTERM"));
+process.on("SIGINT", () => void shutdown("SIGINT"));

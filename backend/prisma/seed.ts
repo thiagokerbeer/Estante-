@@ -319,12 +319,9 @@ async function main() {
   });
 
   await prisma.book.deleteMany();
+  const { count } = await prisma.book.createMany({ data: booksData });
 
-  for (const row of booksData) {
-    await prisma.book.create({ data: row });
-  }
-
-  console.log("Seed OK: usuários demo (FREE + PLUS) e catálogo de livros.");
+  console.log(`Seed OK: usuários demo (FREE + PLUS) e ${count} livros no catálogo.`);
 }
 
 main()

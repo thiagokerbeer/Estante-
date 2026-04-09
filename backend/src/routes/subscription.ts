@@ -13,8 +13,18 @@ subscriptionRouter.post(
   requireSessionUser,
   asyncHandler(async (req, res) => {
     const userId = req.userId!;
-    const ends = new Date();
+
+    // Estende a partir da data vigente se já for PLUS — não penaliza quem renova cedo.
+    const current = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { planEndsAt: true },
+    });
+    const base = current?.planEndsAt && current.planEndsAt > new Date()
+      ? current.planEndsAt
+      : new Date();
+    const ends = new Date(base);
     ends.setDate(ends.getDate() + 30);
+
     try {
       const user = await prisma.user.update({
         where: { id: userId },

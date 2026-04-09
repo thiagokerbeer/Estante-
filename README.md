@@ -27,6 +27,7 @@ Aplicação web de **catálogo de livros** com **planos Free e Plus** (demonstra
 | **Dados** | PostgreSQL 16 |
 | **Auth** | bcryptjs, jsonwebtoken |
 | **Segurança / HTTP** | helmet, cors configurável, express-rate-limit |
+| **Qualidade de código** | graceful shutdown (SIGTERM/SIGINT), logging por env, seed com `createMany` |
 
 ---
 

@@ -74,7 +74,8 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 }
 
 /**
- * Após JWT válido: confirma que o usuário ainda existe (evita sessão “zumbi” após exclusão da conta).
+ * Após JWT válido: confirma que o usuário ainda existe (evita sessão "zumbi" após exclusão da conta).
+ * Express 4 não captura erros de async middleware automaticamente — try/catch encaminha para o handler de erro.
  */
 export const requireSessionUser: RequestHandler = async (req, res, next) => {
   const userId = req.userId;
@@ -82,15 +83,19 @@ export const requireSessionUser: RequestHandler = async (req, res, next) => {
     res.status(401).json({ error: "Não autenticado" });
     return;
   }
-  const row = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-  if (!row) {
-    res.status(401).json({ error: "Sessão inválida. Faça login novamente." });
-    return;
+  try {
+    const row = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!row) {
+      res.status(401).json({ error: "Sessão inválida. Faça login novamente." });
+      return;
+    }
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 };
 
 export async function loadUserPlan(userId: string) {
